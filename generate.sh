@@ -2,7 +2,7 @@
 # run the generator for a single proton in the MicroBooNE geometry
 # all lar commands, is successful, will end with a line - Art has completed and will exit with status 0.
 
-number=1
+number=20
 
 echo $'START!!! Create event generator!' | tee -a record.txt
 lar -n $number -c e_plus_e_minus.fcl &> record.txt
