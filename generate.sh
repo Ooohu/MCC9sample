@@ -2,7 +2,7 @@
 # run the generator for a single proton in the MicroBooNE geometry
 # all lar commands, is successful, will end with a line - Art has completed and will exit with status 0.
 
-number=3 #33
+number=30 
 
 rm *.root &> /dev/null
 
@@ -32,7 +32,8 @@ lar -n $number -c reco_uboone_mcc9_8_driver_stage2.fcl  -s ./*postdlmc.root &>> 
 echo $'\nFINISH!!! Output events info..' | tee -a record.txt
 lar -n $number -c run_PandoraEventDump.fcl -s ./*reco2.root | tee -a result.txt
 
-mv ./*postdlmc.root ./events/
+#the following line cost too much memory
+#mv ./*reco2.root ./events/
 
 echo $'\nGEORGIAK with' $number 'events' >> result.txt
 date >> result.txt
