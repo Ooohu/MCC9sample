@@ -2,7 +2,7 @@
 
 process_name: SinglesGen
 
-outputs.out1.fileName: "e_plus_e_minus_%tc_gen.root"
+outputs.out1.fileName: "epm_%tc_gen.root"
 
 physics.producers.generator.PDG: [ 11,-11 ]            # e-e+
 physics.producers.generator.PosDist: 0             # Flat position dist.
@@ -15,10 +15,10 @@ physics.producers.generator.SigmaY: [ 0 ,0]      # y = (-116.5, 116.5)
 physics.producers.generator.SigmaZ: [ 0 ,0]      # z = (0, 1037)
 physics.producers.generator.SigmaT: [ 0 ,0]        # In time
 physics.producers.generator.PDist: 0               # Flat momentum dist. (0.1-2.0 GeV)
-physics.producers.generator.P0: [ 0.125,0.25 ]
+physics.producers.generator.P0: [0.05,0.25]
 physics.producers.generator.SigmaP: [ 0.,0. ]
 physics.producers.generator.AngleDist: 0           # Flat angle dist.
-physics.producers.generator.Theta0XZ: [ 180,0. ]       # y-azimuth
+physics.producers.generator.Theta0XZ: [1,0]
 physics.producers.generator.Theta0YZ: [ 0.,0. ]       # y-latitude
 physics.producers.generator.SigmaThetaXZ: [ 0.,0. ] # Quasi-isotropic
 physics.producers.generator.SigmaThetaYZ: [ 0.,0. ]

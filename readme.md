@@ -1,7 +1,7 @@
-#MCC9sample_generation
+# MCC9sample_generation
 This code runs in MicroBooNE server.
 
-###Elements
+### Elements
 
 - env.sh: the set up of environment.
 - generate.sh: the whole procedure of producing one set of events.

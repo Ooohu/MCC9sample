@@ -71,7 +71,6 @@ def Summarizer(filename):
 
     #Now try to do it with percentage. or..not
 
-
 	
 #EXTRA INFORMATION FROM OUTPUT
 def Analyzer( filename, output_file):
@@ -84,6 +83,7 @@ def Analyzer( filename, output_file):
     while line:
 	if "Angle" in line:
 	    angle = line
+
 	if "Energy" in line:
 	    energy = line
 
@@ -95,7 +95,6 @@ def Analyzer( filename, output_file):
         if "N Showers" in line:#dont load this with extra delimiter
 	    special = [int(s) for s in line.split() if s.isdigit()][0]
 	    f_csv.write(str(special)+"\n")
->>>>>>> 11ae3598512600e085659750e2377de5a1b8e559
 
         line = fp.readline()#Next line
     fp.close()
@@ -117,8 +116,6 @@ def EventGenerator(fclfile):
     for angle in (0,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,120,150,180):
 	for p1 in (0.025,0.05,0.075,0.1,0.125,0.15):
 	    if angle==0 and p1==0.15: break #WE HAVE DONE A LOT OF THIS
-#    for angle in (0,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,120,150,180):
-#	for p1 in (0.025,0.05,0.075,0.1,0.125,0.15):
 	    subprocess.call('echo "Angle: ' + str(angle) +'" >> result.txt',shell=True)
 	    subprocess.call('echo "Energy: ' + str(p1) +'" >> result.txt',shell=True)
             p2 = 0.3 - p1
@@ -137,10 +134,10 @@ def EventGenerator(fclfile):
                 line_fcl = file.readline()
             file.close()
             fLar.close()
-#            subprocess.call('. generate.sh', shell=True)
+            subprocess.call('. generate.sh', shell=True)
 	    #pick out suspecious events
-	    subprocess.call('echo "N Tracks: 3" >> result.txt',shell=True)
-	    subprocess.call('echo "N Showers: 4" >> result.txt',shell=True)
+#	    subprocess.call('echo "N Tracks: 3" >> result.txt',shell=True)
+#	    subprocess.call('echo "N Showers: 4" >> result.txt',shell=True)
 	    suspicious_count = inspector("result.txt")
 
 	    if (suspicious_count > unusual_events):
@@ -150,7 +147,6 @@ def EventGenerator(fclfile):
 
 ##This is used to check result.txt
 def inspector(file_name):
-
     fp = open(file_name,"r")
     line = fp.readline() #line is a string
     suspicious_count = 0
@@ -162,7 +158,6 @@ def inspector(file_name):
 	line = fp.readline() #line is a string
 	if line=='':
 	    fp.close()
-	    print(suspicious_count)
 	    return suspicious_count
 	   
 
@@ -177,5 +172,4 @@ Analyzer("./result.txt","./result.csv")
 
 #3. The following sumarizes the extracted info. in *.csv and produce two plots in pngs format.
 ##Format: (<str> input)
-Summarizer("summary.csv")
->>>>>>> 11ae3598512600e085659750e2377de5a1b8e559
+#Summarizer("summary.csv") #NO PANDAS IN FERMILAB SERVER...
