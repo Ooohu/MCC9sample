@@ -2,7 +2,7 @@
 # run the generator for a single proton in the MicroBooNE geometry
 # all lar commands, is successful, will end with a line - Art has completed and will exit with status 0.
 
-number=2 
+number=15 
 
 rm *.root &> /dev/null
 

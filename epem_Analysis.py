@@ -115,7 +115,10 @@ def EventGenerator(fclfile):
     unusual_events = 0 #keep track of unusual events (4+ tracks or showrs)
     for angle in (0,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,120,150,180):
 	for p1 in (0.025,0.05,0.075,0.1,0.125,0.15):
-	    if angle==0 and p1==0.15: break #WE HAVE DONE A LOT OF THIS
+#	    if angle==0 and p1==0.15: break #WE HAVE DONE A LOT OF THIS
+	    if angle==0: break #WE HAVE DONE A LOT OF THIS
+	    if angle==1 and p1==0.025: break #WE HAVE DONE A LOT OF THIS
+	    if angle==1 and p1==0.05: break #WE HAVE DONE A LOT OF THIS
 	    subprocess.call('echo "Angle: ' + str(angle) +'" >> result.txt',shell=True)
 	    subprocess.call('echo "Energy: ' + str(p1) +'" >> result.txt',shell=True)
             p2 = 0.3 - p1
