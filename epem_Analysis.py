@@ -12,9 +12,23 @@ def Summarizer(filename):
     sorted_data=data.groupby(['Angle','E1'],sort=True)
     result=pd.DataFrame()#an empty dataframe for storing the sorted dataframe
     first_time = True
-
+     
     #count 0,1,2,2+ track and shower one by one
     column_header = ['Number_of_track','Number_of_shower']#column from the dataframe sorted_data
+    
+    
+    ## First Make a 2D histogram (ref: https://python-graph-gallery.com/83-basic-2d-histograms-with-matplotlib/)
+
+    plt.hist2d(data[column_header[0]], y=data[column_header[1]],bins=(4,4),cmap=plt.cm.BuPu)
+    plt.colorbar()
+    plt.title('Correlation btw Number of Tracks and Number of Showers')
+    plt.xlabel('Number of Tracks',fontsize=12)
+    plt.ylabel('Number of Showers',fontsize=12)
+
+    plt.savefig('2d_histogram.png', bbox_inches='tight')
+
+
+    ##continue counting 0,1,2,2+ track and shower one by one
     track_or_shower = ['track','shower']
     for index in range(0,2): #this loops track and shower; i.e. index=0,1
 	for i in range(0,3): #started from i=0, do i+1 3 times; i.e. i=0,1,2
@@ -115,10 +129,7 @@ def EventGenerator(fclfile):
     unusual_events = 0 #keep track of unusual events (4+ tracks or showrs)
     for angle in (0,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,120,150,180):
 	for p1 in (0.025,0.05,0.075,0.1,0.125,0.15):
-#	    if angle==0 and p1==0.15: break #WE HAVE DONE A LOT OF THIS
-	    if angle==0: break #WE HAVE DONE A LOT OF THIS
-	    if angle==1 and p1==0.025: break #WE HAVE DONE A LOT OF THIS
-	    if angle==1 and p1==0.05: break #WE HAVE DONE A LOT OF THIS
+
 	    subprocess.call('echo "Angle: ' + str(angle) +'" >> result.txt',shell=True)
 	    subprocess.call('echo "Energy: ' + str(p1) +'" >> result.txt',shell=True)
             p2 = 0.3 - p1
@@ -167,12 +178,12 @@ def inspector(file_name):
 #-------------------------------------------EXECUTION HERE-----------------------------------------
 #1. The following generate events, produce an result.txt
 ##Format: (<str> fcl_file)
-EventGenerator('./e_plus_e_minus.fcl')
+#EventGenerator('./e_plus_e_minus.fcl')
 
 #2. The following extracts information from the result.txt and produce a *.csv file
 ##Format: (<str>input_file, <str> output_file, <int> n) Same n as Event Generator
-Analyzer("./result.txt","./result.csv")
+#Analyzer("./result.txt","./result.csv")
 
 #3. The following sumarizes the extracted info. in *.csv and produce two plots in pngs format.
 ##Format: (<str> input)
-#Summarizer("summary.csv") #NO PANDAS IN FERMILAB SERVER...
+Summarizer("summary.csv") #NO PANDAS IN FERMILAB SERVER...
