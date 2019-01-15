@@ -17,8 +17,7 @@ def Summarizer(filename):
     column_header = ['Number_of_track','Number_of_shower']#column from the dataframe sorted_data
     
     
-    ## First Make a 2D histogram (ref: https://python-graph-gallery.com/83-basic-2d-histograms-with-matplotlib/)
-
+    ##---First, make a 2D histogram (ref: https://python-graph-gallery.com/83-basic-2d-histograms-with-matplotlib/)
     plt.hist2d(data[column_header[0]], y=data[column_header[1]],bins=(4,4),cmap=plt.cm.BuPu)
     plt.colorbar()
     plt.title('Correlation btw Number of Tracks and Number of Showers')
@@ -26,9 +25,38 @@ def Summarizer(filename):
     plt.ylabel('Number of Showers',fontsize=12)
 
     plt.savefig('2d_histogram.png', bbox_inches='tight')
+    plt.clf()
 
+    if True:#do more 2d_histogram!
+	dir = '2dhistogram'
+	if os.path.exists(dir)==False:
+	    subprocess.call('mkdir '+dir ,shell=True)
+	    print("A directory is created: " + os.getcwd() +"/"+dir)
+	for angle in (0,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,120,150,180):
+	    selected_data = data.loc[data['Angle'] == angle]
+	    if selected_data.empty==False: 
+	    	plt.hist2d(x=selected_data[column_header[0]], y=selected_data[column_header[1]],bins=(4,4),cmap=plt.cm.BuPu)
+		plt.colorbar()
+    	    	plt.title('Correlation btw Number of Tracks and Number of Showers: '+str(angle)+' degrees')
+    	    	plt.xlabel('Number of Tracks',fontsize=12)
+    	    	plt.ylabel('Number of Showers',fontsize=12)
+	    	name = './2dhistogram/2d_histogram_angle_'+str(angle)+'.png'
+    	    	plt.savefig(name, bbox_inches='tight',type='png',dpi=100)
+		plt.clf()
 
-    ##continue counting 0,1,2,2+ track and shower one by one
+	for p1 in (0.025,0.05,0.075,0.1,0.125,0.15):
+	    selected_data = data.loc[data['E1'] == p1]
+	    if selected_data.empty==False: 
+		plt.hist2d(x=selected_data[column_header[0]], y=selected_data[column_header[1]],bins=(4,4),cmap=plt.cm.BuPu)
+		plt.colorbar()
+    	    	plt.title('Correlation btw Number of Tracks and Number of Showers: '+str(p1)+' GeV')
+    	    	plt.xlabel('Number of Tracks',fontsize=12)
+    	    	plt.ylabel('Number of Showers',fontsize=12)
+	    	name = './2dhistogram/2d_histogram_energy_'+str(p1)+'.png'
+    	    	plt.savefig(name, bbox_inches='tight')
+		plt.clf()
+
+    ##---2D histogram is made at this point, then continue counting 0,1,2,2+ track and shower one by one
     track_or_shower = ['track','shower']
     for index in range(0,2): #this loops track and shower; i.e. index=0,1
 	for i in range(0,3): #started from i=0, do i+1 3 times; i.e. i=0,1,2
@@ -65,6 +93,7 @@ def Summarizer(filename):
     plt.legend(bbox_to_anchor=(1.04,1),loc = "upper left")
 
     plt.savefig('energy_plot.png', bbox_inches='tight')
+    plt.clf()
     
     ##REPEAT
     angle_plot = result.groupby(['Angle']).sum()
@@ -80,6 +109,7 @@ def Summarizer(filename):
     plt.legend(bbox_to_anchor=(1.04,1),loc = "upper left")
 
     plt.savefig('angle_plot.png', bbox_inches='tight')
+    plt.clf()
     
     print("See two pngs: energy_plot.png and angle_plot.png")
 
