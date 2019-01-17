@@ -11,11 +11,12 @@ def Summarizer(filename):
     #prepare the data frame for frequency count
     sorted_data=data.groupby(['Angle','E1'],sort=True)
     result=pd.DataFrame()#an empty dataframe for storing the sorted dataframe
-    first_time = True
+
+#    Normalized = True #If false, the final result will be original event rate
+    first_time = True #this is to initiate the Dataframe
      
-    #count 0,1,2,2+ track and shower one by one
+    #Dataframe: count 0,1,2,2+ track and shower one by one
     column_header = ['Number_of_track','Number_of_shower']#column from the dataframe sorted_data
-    
     
     ##---First, make a 2D histogram (ref: https://python-graph-gallery.com/83-basic-2d-histograms-with-matplotlib/)
     plt.hist2d(data[column_header[0]], y=data[column_header[1]],bins=(4,4),cmap=plt.cm.BuPu)
@@ -72,50 +73,73 @@ def Summarizer(filename):
 	new_column_header = '2+ '+track_or_shower[index]
     	update = sorted_data[column_header[index]].apply(lambda x:(x>2).sum()).reset_index(name = new_column_header)
     	result = result.join(update[new_column_header])
+	
+    
+    ##Set normalization for the plot
+    ###Reference: (https://stackoverflow.com/questions/33791026/calculate-percent-value-across-a-row-in-a-dataframe)
+    
+    result.to_csv("sorted.csv", index = False)
+    print("Sorted csv data see: sorted.csv")
 
-#   print(result)
 
     #plot event rate respected to energy
-    ##delete 'Angle' column after summation respected to 'E1' column
-    energy_plot = result.groupby(['E1']).sum()
-    ##drop the 'Angle' column
-#   energy_plot = pd.read_csv("energy_nor.csv")
-    energy_plot = energy_plot.drop(energy_plot.columns[0],axis=1)
+    for normalization in (0,1):
+	Normalized = True if normalization == 0 else False
 
-#   energy_plot.to_csv("energy.csv") #this is used to calculate percentage manually
+    	###delete 'Angle' column after summation respected to 'E1' column
+    	energy_plot = result.groupby(['E1']).sum()
+    	###drop the 'Angle' column
+    	energy_plot = energy_plot.drop(energy_plot.columns[0],axis=1)#axis=1 is for column
 
-    energy_plot.plot(kind='bar',stacked=True,rot=0)#plot it!
-    ###Below are configuration of the plot
-    ####Some tips: https://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot/43439132#43439132
-    plt.title('Event Rate vs the Weak Shower Energy')
-    plt.xlabel('Energy of the Weak Shower (total energy is 0.3GeV) [Unit: GeV]',fontsize=12)
-    plt.ylabel('Event Rate',fontsize=12,rotation=0,position=(0,1))
-    plt.legend(bbox_to_anchor=(1.04,1),loc = "upper left")
+    	if(Normalized):
+    	    energy_plot = energy_plot.div(energy_plot.sum(1)/100.0,axis=0)#axis=0 is for index
 
-    plt.savefig('energy_plot.png', bbox_inches='tight')
-    plt.clf()
+    	energy_plot.plot(kind='bar',stacked=True,rot=0)#plot it!
+    	energy_plot.to_csv("energy_plot.csv",index=True)#output it
+
+    	####Below are configuration of the plot
+    	#####Some tips: https://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot/43439132#43439132
+
+    	plt.xlabel('Energy of the Weak Shower (total energy is 0.3GeV) [Unit: GeV]',fontsize=12)
+    	plt.ylabel('Event Rate',fontsize=12,rotation=0,position=(0,1))
+    	plt.legend(bbox_to_anchor=(1.04,1),loc = "upper left")
+
+    	if(Normalized):
+    	    plt.title('Event Rate vs the Weak Shower Energy (normalized)')
+    	    plt.savefig('energy_plot_nor.png', bbox_inches='tight')
+    	else:
+    	    plt.title('Event Rate vs the Weak Shower Energy')
+    	    plt.savefig('energy_plot.png', bbox_inches='tight')
+    	plt.clf()
+    	
+    	##REPEAT the plot by deleting 'E1'
+    	angle_plot = result.groupby(['Angle']).sum()
+    	angle_plot = angle_plot.drop(angle_plot.columns[0],axis=1)
+
+    	if(Normalized):
+    	    angle_plot = angle_plot.div(angle_plot.sum(1)/100.0,axis=0)
+
+    	angle_plot.plot(kind='bar',stacked=True)#plot it!
+    	angle_plot.to_csv("angle_plot.csv",index=True)#output it
+
+
+    	plt.xlabel('Shower Open Angle [Unit: Degrees]',fontsize=12)
+    	plt.ylabel('Event Rate',fontsize=12,rotation=0,position=(0,1))
+    	plt.legend(bbox_to_anchor=(1.04,1),loc = "upper left")
+
+    	if(Normalized):
+    	    plt.title('Event Rate vs the Angle between e+e- (normalized)')
+    	    plt.savefig('angle_plot_nor.png', bbox_inches='tight')
+    	else:
+    	    plt.title('Event Rate vs the Angle between e+e-')
+    	    plt.savefig('angle_plot.png', bbox_inches='tight')
+    	    
+    	plt.clf()
     
-    ##REPEAT
-    angle_plot = result.groupby(['Angle']).sum()
-#    angle_plot = pd.read_csv("angle_nor.csv")
-    angle_plot = angle_plot.drop(angle_plot.columns[0],axis=1)
-#    angle_plot.to_csv("angle.csv") #this is used to calculate percentage manually
+    print("See two sets of pngs (with normalized plot as *nor.png): energy_plot.png and angle_plot.png, ")
 
-    angle_plot.plot(kind='bar',stacked=True)#plot it!
 
-    plt.title('Event Rate vs Shower Open Angle')
-    plt.xlabel('Shower Open Angle [Unit: Degrees]',fontsize=12)
-    plt.ylabel('Event Rate',fontsize=12,rotation=0,position=(0,1))
-    plt.legend(bbox_to_anchor=(1.04,1),loc = "upper left")
 
-    plt.savefig('angle_plot.png', bbox_inches='tight')
-    plt.clf()
-    
-    print("See two pngs: energy_plot.png and angle_plot.png")
-
-    #Now try to do it with percentage. or..not
-
-	
 #EXTRA INFORMATION FROM OUTPUT
 def Analyzer( filename, output_file):
 
@@ -212,7 +236,7 @@ def inspector(file_name):
 
 #2. The following extracts information from the result.txt and produce a *.csv file
 ##Format: (<str>input_file, <str> output_file, <int> n) Same n as Event Generator
-#Analyzer("./result.txt","./result.csv")
+Analyzer("./summary.txt","./summary.csv")
 
 #3. The following sumarizes the extracted info. in *.csv and produce two plots in pngs format.
 ##Format: (<str> input)
