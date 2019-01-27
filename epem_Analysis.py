@@ -146,18 +146,22 @@ def Analyzer( filename, output_file):
     fp = open(filename,"r")
     f_csv = open(output_file , "w+")
     line = fp.readline() #line is a string
-    f_csv.write("Angle,E1,Number_of_track,Number_of_shower\n")
+    f_csv.write("Fw_Angle,E1,Open_Angle,Number_of_track,Number_of_shower\n")
 
     while line:
-	if "Angle" in line:
-	    angle = line
+	if "Forwarding Angle" in line:
+	    fw_angle = line
 
 	if "Energy" in line:
 	    energy = line
 
+	if "Open Angle" in line:
+	    op_angle = line
+
 	if "N Tracks" in line:
-	    f_csv.write(NumberReader(angle))
+	    f_csv.write(NumberReader(fw_angle))
 	    f_csv.write(NumberReader(energy)) #output energy of the weak shower
+	    f_csv.write(NumberReader(op_angle))
 	    f_csv.write(NumberReader(line))
 
         if "N Showers" in line:#dont load this with extra delimiter
