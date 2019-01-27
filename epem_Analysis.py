@@ -181,37 +181,90 @@ def NumberReader(current_line):#Read off number from a line and insert a space b
 def EventGenerator(fclfile):
     #exclude case of 0 degree at 150 MeV
     unusual_events = 0 #keep track of unusual events (4+ tracks or showrs)
-    for angle in (0,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,120,150,180):
-	for p1 in (0.025,0.05,0.075,0.1,0.125,0.15):
+    for (angle,event_rate) in [(26,18),(46,9),(60,5),(73,4),(84,3)]:# forwarding angle respected to z
+				#26
+	for energy_index in range(1,10): #[1,10), energy of the electron
+	    for repeating in range(1,event_rate):
+		unusual_events = counter(unusual_events)
 
-	    subprocess.call('echo "Angle: ' + str(angle) +'" >> result.txt',shell=True)
-	    subprocess.call('echo "Energy: ' + str(p1) +'" >> result.txt',shell=True)
-            p2 = 0.3 - p1
-	    print("Producing events with Angle: "+str(angle)+", Energy: "+ str(p1)+".")
+		p1 = 0.3*energy_index/10.0
+		#print("Angle: ",angle," with weight:",event_rate,"; electron energy:",p1)
+		
+		#Calculate e+e- angles (On shell):
+		import math as math
+		import random
 
-	    file = open("epem_pair.fcl","r") #Fixed as reference
-	    fLar = open(fclfile,"w+")
-            line_fcl = file.readline()
-            while line_fcl:
-                if "P0" in line_fcl:
-                    fLar.write("physics.producers.generator.P0: [" + str(p1) + "," + str(p2) +"]\n") #change momentum
-                elif "Theta0XZ" in line_fcl:
-                    fLar.write("physics.producers.generator.Theta0XZ: [" + str(angle) + ",0]\n") #change angle
-                else:
-                    fLar.write(line_fcl)
-                line_fcl = file.readline()
-            file.close()
-            fLar.close()
-            subprocess.call('. generate.sh', shell=True)
+		m = 0.064 # mass of Z' Boson
+		pz=math.sqrt(math.pow(0.3,2)-math.pow(m,2)) # Z' Boson momentum
+		p2=0.3-p1 # energy/momentum of positron
+		
+		# angles respected to z-axis
+		angle_ep=math.acos((p1*p1+pz*pz-p2*p2)/(2*p1*pz))+math.radians(angle) #all in radiants
+		angle_em=math.asin((pz*math.sin(math.radians(angle))-p1*math.sin(angle_ep))/p2)
+		if 2*math.radians(angle)-angle_ep-angle_em>0.001:
+		    # two values for the asin function.
+		    angle_em=math.pi - math.asin((pz*math.sin(math.radians(angle))-p1*math.sin(angle_ep))/p2)
+		
+		#print("angles")
+		#print(math.degrees(angle_ep),math.degrees(angle_em))
+
+		open_angle=math.degrees(math.fabs(angle_ep-angle_em)) #(in radiants)
+		
+		### The projected unit vector of ep & em to xy-plane:
+		u_ep = math.sin(angle_ep)
+		u_em = math.sin(angle_em)
+		
+		### The orintation of the projected unit vector is random:
+		rotation = random.random()*math.pi
+
+		proj_xz= u_ep*math.cos(rotation)
+		proj_yz= u_ep*math.sin(rotation)
+		proj_xz2= u_em*math.cos(rotation)
+		proj_yz2= u_em*math.sin(rotation)
+		
+		xz =math.degrees(math.atan2(proj_xz,math.cos(angle_ep))) #Theta0xz
+		yz =math.degrees(math.atan2(proj_yz,math.cos(angle_ep))) #Theta0yz
+
+		xz2=math.degrees(math.atan2(proj_xz2,math.cos(angle_em))) #Theta0xz2
+		yz2=math.degrees(math.atan2(proj_yz2,math.cos(angle_em))) #Theta0yz2
+		
+#		print(p1,xz,yz,p2,xz2,yz2)
+
+		subprocess.call('echo "\nForwarding Angle: ' + str(angle) +'" >> result.txt',shell=True)
+		subprocess.call('echo "Energy: ' + str(p1) +'" >> result.txt',shell=True)
+		subprocess.call('echo "Open Angle: ' + str(open_angle) +'" >> result.txt',shell=True)
+	    	print("\nProducing events with Forwarding Angle: "+str(angle)+", Electron Energy: "+ str(p1)+", Open Angle: "+str(open_angle)+".")
+
+	    	file = open("epem_pair.fcl","r") #Fixed as reference
+	    	fLar = open(fclfile,"w+")
+            	line_fcl = file.readline()
+            	while line_fcl:
+		    if "P0" in line_fcl:
+                        fLar.write("physics.producers.generator.P0: [" + str(p1) + "," + str(p2) +"]\n") #change momentum
+                    elif "Theta0XZ" in line_fcl:
+                        fLar.write("physics.producers.generator.Theta0XZ: [" + str(xz) + ","+str(xz2)+"]\n") #change angle
+                    elif "Theta0YZ" in line_fcl:
+                        fLar.write("physics.producers.generator.Theta0YZ: [" + str(yz) + ","+str(yz2)+"]\n") #change angle
+                    else:
+                        fLar.write(line_fcl)
+                    line_fcl = file.readline()
+		file.close()
+            	fLar.close()
+#	    	subprocess.call('. generate.sh', shell=True)
+    print(unusual_events)
+    
+
 	    #pick out suspecious events
 #	    subprocess.call('echo "N Tracks: 3" >> result.txt',shell=True)
 #	    subprocess.call('echo "N Showers: 4" >> result.txt',shell=True)
-	    suspicious_count = inspector("result.txt")
+#	    suspicious_count = inspector("result.txt")
 
-	    if (suspicious_count > unusual_events):
-		unusual_events = suspicious_count		
+#	    if (suspicious_count > unusual_events):
+#		unusual_events = suspicious_count		
 #		subprocess.call('echo "BANG"',shell=True)
-		subprocess.call('mv ./*reco2.root ./events/',shell=True)
+#		subprocess.call('mv ./*reco2.root ./events/',shell=True)
+def counter(a):
+    return a+1
 
 ##This is used to check result.txt
 def inspector(file_name):
@@ -232,12 +285,12 @@ def inspector(file_name):
 #-------------------------------------------EXECUTION HERE-----------------------------------------
 #1. The following generate events, produce an result.txt
 ##Format: (<str> fcl_file)
-#EventGenerator('./e_plus_e_minus.fcl')
+EventGenerator('./e_plus_e_minus.fcl')
 
 #2. The following extracts information from the result.txt and produce a *.csv file
 ##Format: (<str>input_file, <str> output_file, <int> n) Same n as Event Generator
-Analyzer("./summary.txt","./summary.csv")
+#Analyzer("./summary.txt","./summary.csv")
 
 #3. The following sumarizes the extracted info. in *.csv and produce two plots in pngs format.
 ##Format: (<str> input)
-Summarizer("summary.csv") #NO PANDAS IN FERMILAB SERVER...
+#Summarizer("summary.csv") #NO PANDAS IN FERMILAB SERVER...
